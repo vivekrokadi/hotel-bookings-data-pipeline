@@ -17,3 +17,9 @@ def count_invalid_dates(df):
       invalid_count[column] = df[column].isna().sum()
       
    return invalid_count
+
+
+def create_booking_metrics(df):
+   df['lead_time_days'] = (df['check_in_date'] - df['booking_date']).dt.days
+   df['no_of_days_stayed']= (df['checkout_date'] - df['check_in_date']).dt.days
+   return df
