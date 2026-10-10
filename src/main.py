@@ -1,5 +1,5 @@
 from data_loader import load_csv
-from data_validation import validate_bookings, validation_report
+from data_validation import validate_bookings, validation_report, validate_booking_metrics, booking_metric_validation_report
 from data_cleaning import clean_bookings
 from data_profiling import profile_dataframe
 from data_transformation import transform_dates, count_invalid_dates, create_booking_metrics
@@ -39,4 +39,17 @@ cleaned_bookings = transform_dates(cleaned_bookings)
 
 cleaned_bookings = create_booking_metrics(cleaned_bookings)
 
-print(cleaned_bookings)
+
+# print(cleaned_bookings[['lead_time_days', 'no_of_days_stayed']].head(10))
+# print(cleaned_bookings[['lead_time_days', 'no_of_days_stayed']].isna().sum())
+# print((cleaned_bookings['lead_time_days'] < 0).sum())
+# print((cleaned_bookings['no_of_days_stayed'] < 0).sum())
+
+
+
+invalid_metric_records = validate_booking_metrics(cleaned_bookings)
+
+metric_report  = booking_metric_validation_report(len(cleaned_bookings), len(invalid_metric_records))
+
+for key, value in metric_report.items():
+    print(f'{key}: {value}')
