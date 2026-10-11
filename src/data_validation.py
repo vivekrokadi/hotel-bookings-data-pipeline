@@ -17,10 +17,49 @@ def validation_report(total_records, invalid_count):
     }
 
 
+
 def validate_booking_metrics(df):
-    invalid_records = df[(df['lead_time_days'] < 0) | (df['no_of_days_stayed'] < 0) | (df['lead_time_days'].isna()) | (df['no_of_days_stayed'].isna()) ]
+    invalid_condition = (
+        (df['lead_time_days'] < 0) |
+        (df['no_of_days_stayed'] < 0) |
+        (df['lead_time_days'].isna()) |
+        (df['no_of_days_stayed'].isna())
+    )
+
+    invalid_records = df.loc[invalid_condition].copy()
+    invalid_records['validation_reason'] = ''
+
+    validation_rules = [
+        (
+            invalid_records['lead_time_days'] < 0,
+            'negative_lead_time'
+        ),
+        (
+            invalid_records['no_of_days_stayed'] < 0,
+            'negative_stay_duration'
+        ),
+        (
+            invalid_records['lead_time_days'].isna(),
+            'missing_lead_time'
+        ),
+        (
+            invalid_records['no_of_days_stayed'].isna(),
+            'missing_stay_duration'
+        )
+    ]
+
+    for condition, reason in validation_rules:
+        current_reason = invalid_records.loc[
+            condition, 'validation_reason'
+        ]
+
+        invalid_records.loc[condition, 'validation_reason'] = (
+            current_reason
+            .apply(lambda existing: f'{existing}; {reason}' if existing else reason)
+        )
 
     return invalid_records
+
 
 def booking_metric_validation_report(total_records, invalid_metric_records_count):
     if total_records == 0:
