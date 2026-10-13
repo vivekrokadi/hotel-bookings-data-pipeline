@@ -26,4 +26,8 @@ def test_booking_metrics(booking_date, check_in_date, checkout_date, lead_time_d
         assert pd.isna(df['no_of_days_stayed'].iloc[0])
     else:
         assert df['no_of_days_stayed'].iloc[0] == no_of_days_stayed
+
+    assert 'booking_date' in df.columns
+    assert 'check_in_date' in df.columns
+    assert 'checkout_date' in df.columns
   
