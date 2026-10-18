@@ -3,7 +3,10 @@ from data_validation import validate_bookings, validation_report, validate_booki
 from data_cleaning import clean_bookings
 from data_profiling import profile_dataframe
 from data_transformation import transform_dates, count_invalid_dates, create_booking_metrics
+from logger_config import setup_logger
 
+setup_logger()
+   
 df_bookings = load_csv("fact_bookings.csv")
 
 invalid_records = validate_bookings(df_bookings)
