@@ -3,18 +3,18 @@ import pandas as pd
 from src.data_validation import validate_bookings, validation_report
 
 @pytest.mark.parametrize(
-    "no_guests, revenue_generated, expected",
+    "no_guests, revenue_generated, expected, validation_reason",
     [
-        (0, 100, 1),
-        (-1, 100, 1),
-        (float("nan"), 100,1),
-        (2, 0, 1),
-        (2, -100, 1),
-        (2, 500, 0),
+        (0, 100, 1, 'negative_no_guests'),
+        (-1, 100, 1, 'negative_no_guests'),
+        (float("nan"), 100,1, 'missing_no_guests'),
+        (2, -100, 1, 'negative_revenue_generated'),
+        (2, float('nan'), 1, 'missing_revenue_generated'),
+        (-2, float('nan'), 1, 'negative_no_guests; missing_revenue_generated'),
     ]
 )
 
-def test_validate_bookings(no_guests, revenue_generated, expected):
+def test_validate_bookings(no_guests, revenue_generated, expected, validation_reason):
     df = pd.DataFrame({
         "no_guests": [no_guests],
         "revenue_generated": [revenue_generated]
@@ -23,6 +23,7 @@ def test_validate_bookings(no_guests, revenue_generated, expected):
     result = validate_bookings(df)
 
     assert len(result) == expected
+    assert result['validation_reason'].iloc[0] == validation_reason
 
 
 def test_validation_report():

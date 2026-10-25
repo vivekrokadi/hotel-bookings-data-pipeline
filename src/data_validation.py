@@ -1,5 +1,43 @@
 def validate_bookings(df):
-    invalid_records = df[(df['no_guests'] <= 0) | (df['no_guests'].isna()) | (df['revenue_generated'] <= 0)]
+    invalid_condition = (
+            (df['no_guests'] <= 0) |
+            (df['revenue_generated'] <= 0) |
+            (df['no_guests'].isna()) |
+            (df['revenue_generated'].isna())
+        )
+    invalid_records = df.loc[invalid_condition].copy()
+    invalid_records['validation_reason'] = ''
+
+    validation_rules = [
+        (
+            invalid_records['no_guests'] <= 0,
+            'negative_no_guests'
+        ),
+        (
+            invalid_records['revenue_generated'] <= 0,
+            'negative_revenue_generated'
+        ),
+        (
+            invalid_records['no_guests'].isna(),
+            'missing_no_guests'
+        ),
+        (
+            invalid_records['revenue_generated'].isna(),
+            'missing_revenue_generated'
+        )
+    ]
+
+    for condition, reason in validation_rules:
+        current_reason = invalid_records.loc[
+            condition, 'validation_reason'
+        ]
+    
+        invalid_records.loc[condition, 'validation_reason'] = (
+        current_reason
+            .apply(lambda existing: f'{existing}; {reason}' if existing else reason)
+        )
+
+    
 
     return invalid_records
 
