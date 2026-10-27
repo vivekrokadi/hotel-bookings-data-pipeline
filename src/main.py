@@ -1,11 +1,12 @@
 from data_loader import load_csv
-from data_validation import validate_bookings, validation_report, validate_booking_metrics, booking_metric_validation_report
+from data_validation import validate_bookings, validation_report, validate_booking_metrics, booking_metric_validation_report, validate_stay_dates
 from data_cleaning import clean_bookings
 from data_profiling import profile_dataframe
 from data_transformation import transform_dates, count_invalid_dates, create_booking_metrics
 from logger_config import setup_logger
 import logging
 from data_writer import save_records
+import pandas as pd
 
 setup_logger()
 logger = logging.getLogger(__name__)
@@ -49,6 +50,29 @@ else:
 
 # print("Invalid dates count after cleaning: ",count_invalid_dates(cleaned_bookings))
 
+invalid_stay_records = validate_stay_dates(cleaned_bookings)
+logger.info(
+    "Found %s bookings with invalid stay dates",
+    len(invalid_stay_records)
+)
+
+
+invalid_stay_indices = invalid_stay_records.index
+
+cleaned_bookings = cleaned_bookings.drop(
+    index=invalid_stay_indices
+).copy()
+
+logger.info(
+    "%s bookings remain after stay-date validation",
+    len(cleaned_bookings)
+)
+
+rejected_bookings = pd.concat(
+    [invalid_records, invalid_stay_records],
+    ignore_index=True,
+    sort=False
+)
 cleaned_bookings = create_booking_metrics(cleaned_bookings)
 logger.info("Booking metrics created successfully")
 
@@ -63,7 +87,6 @@ metric_report  = booking_metric_validation_report(len(cleaned_bookings), len(inv
 
 print("Booking metric validation report:", metric_report)
 
-
-
 save_records(cleaned_bookings, 'processed/cleaned_bookings.csv')
-save_records(invalid_records, 'rejected/invalid_bookings.csv')
+save_records(rejected_bookings, 'rejected/invalid_bookings.csv')
+

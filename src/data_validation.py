@@ -110,3 +110,12 @@ def booking_metric_validation_report(total_records, invalid_metric_records_count
         'invalid_count': invalid_metric_records_count,
         'invalid_percentage': invalid_percentage
     }
+
+def validate_stay_dates(df):
+    invalid_condition = df['checkout_date'] <= df['check_in_date']
+
+    invalid_records = df.loc[invalid_condition].copy()
+
+    invalid_records['validation_reason'] = 'invalid_stay_dates'
+
+    return invalid_records

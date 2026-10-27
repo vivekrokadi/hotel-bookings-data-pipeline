@@ -1,6 +1,7 @@
 import pytest
 import pandas as pd
-from src.data_validation import validate_bookings, validation_report
+from src.data_validation import validate_bookings, validation_report, validate_stay_dates
+from src.data_transformation import transform_dates
 
 @pytest.mark.parametrize(
     "no_guests, revenue_generated, expected, validation_reason",
@@ -34,3 +35,27 @@ def test_validation_report():
     assert result['total_records'] == 0
     assert result['invalid_records'] == 0
     assert result['invalid_percentage'] == 0
+
+
+@pytest.mark.parametrize(
+    "check_in_date, checkout_date, expected",
+    [
+        ('2026-oct-10', '2026-oct-12', 0),
+        ('2026-oct-12', '2026-oct-10', 1),
+        ('2026-oct-10', '2026-oct-10', 1)
+        
+    ]
+)
+
+
+def test_validate_stay_dates(check_in_date, checkout_date, expected):
+    df = pd.DataFrame({
+        "booking_date": ["2026-oct-01"],
+        "check_in_date": [check_in_date],
+        "checkout_date": [checkout_date],
+    })
+    df = transform_dates(df)
+
+    result = validate_stay_dates(df)
+
+    assert len(result) == expected
