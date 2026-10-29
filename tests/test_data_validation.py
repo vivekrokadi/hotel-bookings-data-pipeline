@@ -38,17 +38,16 @@ def test_validation_report():
 
 
 @pytest.mark.parametrize(
-    "check_in_date, checkout_date, expected",
+    "check_in_date, checkout_date, expected, validation_reason",
     [
-        ('2026-oct-10', '2026-oct-12', 0),
-        ('2026-oct-12', '2026-oct-10', 1),
-        ('2026-oct-10', '2026-oct-10', 1)
-        
+        (float('nan'), float('nan'), 1, 'missing_check_in_date; missing_checkout_date'),
+        ('2026-oct-12', '2026-oct-10', 1, 'invalid_stay_dates'),
+        (float('nan'), '2026-oct-10', 1, 'missing_check_in_date')
     ]
 )
 
 
-def test_validate_stay_dates(check_in_date, checkout_date, expected):
+def test_validate_stay_dates(check_in_date, checkout_date, expected, validation_reason):
     df = pd.DataFrame({
         "booking_date": ["2026-oct-01"],
         "check_in_date": [check_in_date],
@@ -59,3 +58,4 @@ def test_validate_stay_dates(check_in_date, checkout_date, expected):
     result = validate_stay_dates(df)
 
     assert len(result) == expected
+    assert result['validation_reason'].iloc[0] == validation_reason
